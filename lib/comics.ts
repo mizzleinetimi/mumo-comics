@@ -1,7 +1,6 @@
 import { cache } from 'react';
 import { supabaseAdmin } from './supabase/server';
 import type { Comic } from '@/types/comic';
-import { compileMDX } from 'next-mdx-remote/rsc';
 
 /**
  * Compares two comics by publish date (descending) with slug as tiebreaker
@@ -128,14 +127,10 @@ export const getLatestComic = cache(async (): Promise<Comic | null> => {
  * @param tag - The tag to filter by
  * @returns Array of comics with the specified tag, sorted by publish date
  */
-export const getComicsByTag = cache(
-  async (tag: string): Promise<Comic[]> => {
-    const allComics = await getAllComics();
-    return allComics.filter((comic) =>
-      comic.frontmatter.tags.includes(tag)
-    );
-  }
-);
+export const getComicsByTag = cache(async (tag: string): Promise<Comic[]> => {
+  const allComics = await getAllComics();
+  return allComics.filter((comic) => comic.frontmatter.tags.includes(tag));
+});
 
 /**
  * Retrieves all unique tags used across all comics
