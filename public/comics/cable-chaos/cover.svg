@@ -1,0 +1,6 @@
+<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#FF8C42"/>
+  <rect x="50" y="50" width="1100" height="530" fill="#FFD166" rx="20"/>
+  <text x="600" y="315" font-family="Arial, sans-serif" font-size="72" font-weight="bold" text-anchor="middle" fill="#FF8C42">Cable Chaos</text>
+  <text x="600" y="400" font-family="Arial, sans-serif" font-size="36" text-anchor="middle" fill="#06BEE1">A Mumo Comic</text>
+</svg>
