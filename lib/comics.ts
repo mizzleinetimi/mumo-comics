@@ -1,12 +1,7 @@
-import path from 'path';
 import { cache } from 'react';
-import { parseMDXFile, getMDXFiles, extractSlugFromFilename } from './mdx';
+import { supabaseAdmin } from './supabase/server';
 import type { Comic } from '@/types/comic';
-
-/**
- * Directory containing comic MDX files
- */
-const COMICS_DIRECTORY = path.join(process.cwd(), 'content', 'comics');
+import { compileMDX } from 'next-mdx-remote/rsc';
 
 /**
  * Compares two comics by publish date (descending) with slug as tiebreaker
@@ -18,7 +13,7 @@ const COMICS_DIRECTORY = path.join(process.cwd(), 'content', 'comics');
  */
 function compareByDateAndSlug(a: Comic, b: Comic): number {
   const dateA = new Date(a.frontmatter.publishDate).getTime();
-  const dateB = new Date(b.frontmatter.publishDate).getTime();
+  const dateB = new Date(a.frontmatter.publishDate).getTime();
 
   // Sort by date descending (newest first)
   if (dateA !== dateB) {
@@ -30,209 +25,173 @@ function compareByDateAndSlug(a: Comic, b: Comic): number {
 }
 
 /**
- * Retrieves all published comics from the file system
+ * Retrieves all published comics from Supabase
  * Results are sorted by publish date (newest first) with slug as tiebreaker
  *
- * This function is cached using React's cache() to prevent redundant file reads
+ * This function is cached using React's cache() to prevent redundant database queries
  * within the same request lifecycle
  *
  * @returns Array of all comics sorted by publish date descending
- * @throws Error if comics directory cannot be read or comics cannot be parsed
- *
- * Requirements: 1.3, 2.1, 11.1, 11.2
+ * @throws Error if database query fails
  */
 export const getAllComics = cache(async (): Promise<Comic[]> => {
   try {
-    // Get all MDX files from the comics directory
-    const mdxFiles = await getMDXFiles(COMICS_DIRECTORY);
+    const { data, error } = await supabaseAdmin
+      .from('comics')
+      .select('*')
+      .order('publish_date', { ascending: false });
 
-    // Parse each MDX file
+    if (error) throw error;
+    if (!data) return [];
+
+    // Transform database records to Comic type
     const comics: Comic[] = await Promise.all(
-      mdxFiles.map(async (filePath) => {
-        const { frontmatter, content } = await parseMDXFile(filePath);
-        const slug = extractSlugFromFilename(filePath);
-
+      data.map(async (record) => {
         return {
-          frontmatter,
-          content,
-          slug,
+          slug: record.slug,
+          content: record.content,
+          frontmatter: {
+            title: record.title,
+            slug: record.slug,
+            publishDate: record.publish_date,
+            synopsis: record.synopsis,
+            tags: record.tags || [],
+            readingTime: record.reading_time || 5,
+            coverImage: record.cover_image_url || '',
+            author: record.author || 'Mumo Team',
+            featured: record.featured || false,
+          },
         };
       })
     );
 
-    // Sort by publish date (newest first) with slug as tiebreaker
-    comics.sort(compareByDateAndSlug);
-
-    return comics;
+    // Sort using the same logic as before
+    return comics.sort(compareByDateAndSlug);
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    throw new Error(`Failed to retrieve comics: ${message}`);
+    console.error('Error fetching comics:', error);
+    throw new Error('Failed to fetch comics from database');
   }
 });
 
 /**
- * Retrieves a specific comic by its slug
+ * Retrieves a single comic by its slug from Supabase
  *
- * This function is cached using React's cache() to prevent redundant file reads
- * within the same request lifecycle
- *
- * @param slug - The unique slug identifier for the comic
- * @returns The comic if found, null otherwise
- * @throws Error if comics cannot be retrieved
- *
- * Requirements: 3.1, 11.1, 11.2
+ * @param slug - The URL-friendly identifier for the comic
+ * @returns The comic with compiled MDX content, or null if not found
  */
 export const getComicBySlug = cache(
   async (slug: string): Promise<Comic | null> => {
     try {
-      const comics = await getAllComics();
-      return comics.find((comic) => comic.slug === slug) || null;
+      const { data, error } = await supabaseAdmin
+        .from('comics')
+        .select('*')
+        .eq('slug', slug)
+        .single();
+
+      if (error || !data) return null;
+
+      return {
+        slug: data.slug,
+        content: data.content,
+        frontmatter: {
+          title: data.title,
+          slug: data.slug,
+          publishDate: data.publish_date,
+          synopsis: data.synopsis,
+          tags: data.tags || [],
+          readingTime: data.reading_time || 5,
+          coverImage: data.cover_image_url || '',
+          author: data.author || 'Mumo Team',
+          featured: data.featured || false,
+        },
+      };
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      throw new Error(`Failed to retrieve comic by slug "${slug}": ${message}`);
+      console.error(`Error fetching comic ${slug}:`, error);
+      return null;
     }
   }
 );
 
 /**
  * Retrieves the most recently published comic
- * Uses publish date with slug as tiebreaker for consistent results
  *
- * @returns The latest comic
- * @throws Error if no comics exist or comics cannot be retrieved
- *
- * Requirements: 1.3, 1.4
+ * @returns The latest comic, or null if no comics exist
  */
-export const getLatestComic = cache(async (): Promise<Comic> => {
-  try {
-    const comics = await getAllComics();
-
-    if (comics.length === 0) {
-      throw new Error('No comics available');
-    }
-
-    // Comics are already sorted by date descending, so first is latest
-    return comics[0];
-  } catch (error) {
-    if (error instanceof Error && error.message === 'No comics available') {
-      throw error;
-    }
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    throw new Error(`Failed to retrieve latest comic: ${message}`);
-  }
+export const getLatestComic = cache(async (): Promise<Comic | null> => {
+  const comics = await getAllComics();
+  return comics.length > 0 ? comics[0] : null;
 });
 
 /**
- * Retrieves all comics that include a specific tag
- * Results maintain the same chronological ordering as getAllComics()
+ * Retrieves all comics that have a specific tag
  *
  * @param tag - The tag to filter by
- * @returns Array of comics containing the specified tag
- * @throws Error if comics cannot be retrieved
- *
- * Requirements: 2.3
+ * @returns Array of comics with the specified tag, sorted by publish date
  */
-export const getComicsByTag = cache(async (tag: string): Promise<Comic[]> => {
-  try {
-    const comics = await getAllComics();
-    return comics.filter((comic) => comic.frontmatter.tags.includes(tag));
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    throw new Error(`Failed to retrieve comics by tag "${tag}": ${message}`);
+export const getComicsByTag = cache(
+  async (tag: string): Promise<Comic[]> => {
+    const allComics = await getAllComics();
+    return allComics.filter((comic) =>
+      comic.frontmatter.tags.includes(tag)
+    );
   }
-});
+);
 
 /**
- * Retrieves all unique tags from all comics
- * Tags are sorted alphabetically for consistent display
+ * Retrieves all unique tags used across all comics
+ * Tags are sorted by frequency (most common first)
  *
- * @returns Array of unique tag strings sorted alphabetically
- * @throws Error if comics cannot be retrieved
- *
- * Requirements: 2.3
+ * @returns Array of unique tag strings sorted by usage frequency
  */
 export const getAllTags = cache(async (): Promise<string[]> => {
-  try {
-    const comics = await getAllComics();
+  const comics = await getAllComics();
+  const tagCounts = new Map<string, number>();
 
-    // Collect all tags from all comics
-    const allTags = comics.flatMap((comic) => comic.frontmatter.tags);
+  comics.forEach((comic) => {
+    comic.frontmatter.tags.forEach((tag) => {
+      tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+    });
+  });
 
-    // Get unique tags and sort alphabetically
-    const uniqueTags = Array.from(new Set(allTags)).sort();
-
-    return uniqueTags;
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    throw new Error(`Failed to retrieve all tags: ${message}`);
-  }
+  return Array.from(tagCounts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .map(([tag]) => tag);
 });
 
 /**
- * Selects a random comic from all available comics
+ * Retrieves a random comic from all published comics
  *
- * @returns A randomly selected comic
- * @throws Error if no comics exist or comics cannot be retrieved
- *
- * Requirements: 2.4
+ * @returns A randomly selected comic, or null if no comics exist
  */
-export const getRandomComic = cache(async (): Promise<Comic> => {
-  try {
-    const comics = await getAllComics();
+export const getRandomComic = cache(async (): Promise<Comic | null> => {
+  const comics = await getAllComics();
+  if (comics.length === 0) return null;
 
-    if (comics.length === 0) {
-      throw new Error('No comics available');
-    }
-
-    const randomIndex = Math.floor(Math.random() * comics.length);
-    return comics[randomIndex];
-  } catch (error) {
-    if (error instanceof Error && error.message === 'No comics available') {
-      throw error;
-    }
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    throw new Error(`Failed to retrieve random comic: ${message}`);
-  }
+  const randomIndex = Math.floor(Math.random() * comics.length);
+  return comics[randomIndex];
 });
 
 /**
- * Retrieves the previous and next comics relative to a given comic slug
- * Based on chronological ordering (publish date with slug tiebreaker)
+ * Gets the previous and next comics relative to a given slug
+ * Used for navigation between comics
  *
  * @param slug - The slug of the current comic
- * @returns Object containing previous and next comics (null if at boundaries)
- * @throws Error if comics cannot be retrieved
- *
- * Requirements: 3.3, 3.4, 3.5
+ * @returns Object with previous and next comics (null if none exist)
  */
 export const getAdjacentComics = cache(
   async (
     slug: string
-  ): Promise<{
-    previous: Comic | null;
-    next: Comic | null;
-  }> => {
-    try {
-      const comics = await getAllComics();
-      const currentIndex = comics.findIndex((comic) => comic.slug === slug);
+  ): Promise<{ previous: Comic | null; next: Comic | null }> => {
+    const comics = await getAllComics();
+    const currentIndex = comics.findIndex((comic) => comic.slug === slug);
 
-      if (currentIndex === -1) {
-        return { previous: null, next: null };
-      }
-
-      // Previous comic is the one published before (later in array, older date)
-      const previous =
-        currentIndex < comics.length - 1 ? comics[currentIndex + 1] : null;
-
-      // Next comic is the one published after (earlier in array, newer date)
-      const next = currentIndex > 0 ? comics[currentIndex - 1] : null;
-
-      return { previous, next };
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      throw new Error(
-        `Failed to retrieve adjacent comics for "${slug}": ${message}`
-      );
+    if (currentIndex === -1) {
+      return { previous: null, next: null };
     }
+
+    return {
+      previous: currentIndex > 0 ? comics[currentIndex - 1] : null,
+      next: currentIndex < comics.length - 1 ? comics[currentIndex + 1] : null,
+    };
   }
 );

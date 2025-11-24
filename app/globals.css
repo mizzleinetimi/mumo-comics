@@ -8,6 +8,65 @@ body {
   background-size: 20px 20px;
 }
 
+@layer utilities {
+  .text-stroke-3 {
+    -webkit-text-stroke: 3px black;
+  }
+
+  .text-stroke-white {
+    -webkit-text-stroke: 3px white;
+  }
+
+  /* Cloud floating animations */
+  @keyframes float {
+
+    0%,
+    100% {
+      transform: translateY(0px) translateX(0px);
+    }
+
+    50% {
+      transform: translateY(-20px) translateX(10px);
+    }
+  }
+
+  @keyframes float-slow {
+
+    0%,
+    100% {
+      transform: translateY(0px) translateX(0px);
+    }
+
+    50% {
+      transform: translateY(-15px) translateX(-8px);
+    }
+  }
+
+  @keyframes float-slower {
+
+    0%,
+    100% {
+      transform: translateY(0px) translateX(0px);
+    }
+
+    50% {
+      transform: translateY(-10px) translateX(5px);
+    }
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-float-slow {
+    animation: float-slow 8s ease-in-out infinite;
+  }
+
+  .animate-float-slower {
+    animation: float-slower 10s ease-in-out infinite;
+  }
+}
+
 :root {
   --mumo-orange: #ff8c42;
   --mumo-yellow: #ffd166;

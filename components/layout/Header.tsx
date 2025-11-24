@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Navigation } from './Navigation';
 
 /**
@@ -27,9 +28,16 @@ export function Header() {
                 <h1 className="text-3xl font-heading font-bold text-black group-hover:text-mumo-orange transition-colors">
                   Mumo Comics
                 </h1>
-                <p className="text-xs font-bold text-gray-500 hidden sm:block uppercase tracking-wider">
-                  Weekly adventures in tech & streaming
-                </p>
+                <div className="text-xs font-bold text-gray-500 hidden sm:flex items-center gap-1 uppercase tracking-wider">
+                  Weekly Comics
+                  <Image
+                    src="/images/yam.svg"
+                    alt="Yam"
+                    width={20}
+                    height={20}
+                    className="inline-block -mt-1"
+                  />
+                </div>
               </div>
             </Link>
           </div>

@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import { Button } from '@/components/ui/Button';
-import { Badge, BadgeGroup } from '@/components/ui/Badge';
+import { Badge } from '@/components/ui/Badge';
 import type { Comic } from '@/types/comic';
 
 /**
@@ -10,17 +10,7 @@ interface LatestIssueHeroProps {
   comic: Comic;
 }
 
-/**
- * Formats a date string to a readable format
- */
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-}
+
 
 /**
  * LatestIssueHero component for displaying the latest comic in a hero section
@@ -36,142 +26,103 @@ function formatDate(dateString: string): string {
  * Requirements: 1.1, 1.2, 7.1
  */
 export function LatestIssueHero({ comic }: LatestIssueHeroProps) {
-  const { title, synopsis, publishDate, readingTime, coverImage, tags } =
+  const { title, synopsis, readingTime, coverImage, tags } =
     comic.frontmatter;
   const comicUrl = `/comics/${comic.slug}`;
 
   return (
     <section
-      className="bg-mumo-yellow border-b-3 border-black py-12 md:py-20 relative overflow-hidden"
+      className="bg-mumo-blue border-b-3 border-black py-12 relative overflow-hidden"
       aria-labelledby="latest-issue-title"
     >
-      {/* Decorative dots pattern overlay */}
-      <div
-        className="absolute inset-0 opacity-10"
-        style={{
-          backgroundImage: 'radial-gradient(#000 2px, transparent 2px)',
-          backgroundSize: '20px 20px',
-        }}
-      ></div>
+      {/* Decorative background pattern */}
+      <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(#fff 2px, transparent 2px)', backgroundSize: '30px 30px' }}></div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Latest Issue Label */}
-        <div className="mb-8">
-          <span className="inline-block bg-white text-black border-3 border-black font-heading font-bold px-6 py-2 rounded-full text-base uppercase tracking-wide shadow-hard transform -rotate-2">
-            ✨ Latest Issue
-          </span>
-        </div>
+      {/* Cartoon Clouds */}
+      <div className="absolute top-8 left-10 w-40 h-20 opacity-90 animate-float">
+        <Image src="/images/cloud.svg" alt="" fill className="object-contain" />
+      </div>
+      <div className="absolute top-16 right-16 w-56 h-28 opacity-70 animate-float-slow">
+        <Image src="/images/cloud.svg" alt="" fill className="object-contain" />
+      </div>
+      <div className="absolute bottom-12 left-1/4 w-32 h-16 opacity-80 animate-float-slower">
+        <Image src="/images/cloud.svg" alt="" fill className="object-contain" />
+      </div>
+      <div className="absolute top-1/3 right-1/3 w-48 h-24 opacity-60 animate-float">
+        <Image src="/images/cloud.svg" alt="" fill className="object-contain" />
+      </div>
 
-        {/* Hero Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
-          {/* Cover Image */}
-          <div className="relative aspect-[3/4] lg:aspect-square rounded-2xl overflow-hidden border-3 border-black shadow-hard-lg bg-white transform rotate-1 hover:rotate-0 transition-transform duration-300">
-            <Image
-              src={coverImage}
-              alt={`Cover image for ${title}`}
-              fill
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-cover"
-              priority
-            />
-          </div>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
 
-          {/* Content */}
-          <div className="text-black">
-            {/* Title */}
+        {/* Poster Container */}
+        <div className="relative inline-block">
+
+          {/* Title - Overlaid on top */}
+          <div className="relative z-20 -mb-12 transform -rotate-2">
+            <span className="block text-xl font-bold text-white tracking-widest uppercase mb-1 drop-shadow-md">The Mumo Show Presents</span>
             <h1
               id="latest-issue-title"
-              className="text-5xl md:text-6xl lg:text-7xl font-heading font-bold mb-6 leading-none text-black drop-shadow-sm"
+              className="text-6xl md:text-8xl font-heading font-bold text-mumo-orange text-stroke-3 drop-shadow-[4px_4px_0px_rgba(0,0,0,1)]"
             >
               {title}
             </h1>
+          </div>
 
-            {/* Metadata */}
-            <div className="flex flex-wrap items-center gap-4 mb-8 text-sm md:text-base font-bold bg-white inline-flex p-3 rounded-xl border-2 border-black shadow-hard-sm">
-              <span className="flex items-center gap-2">
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2.5}
-                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                  />
-                </svg>
-                {formatDate(publishDate)}
-              </span>
-              <span className="w-1.5 h-1.5 rounded-full bg-black"></span>
-              <span className="flex items-center gap-2">
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2.5}
-                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                {readingTime} min read
-              </span>
+          {/* Cover Image - Poster Style */}
+          <div className="relative z-10 bg-white p-4 pb-16 rounded-3xl border-3 border-black shadow-hard-lg transform rotate-1 mx-auto max-w-md md:max-w-lg">
+            <div className="relative aspect-[3/4] rounded-2xl overflow-hidden border-2 border-black">
+              <Image
+                src={coverImage}
+                alt={`Cover image for ${title}`}
+                fill
+                sizes="(max-width: 768px) 100vw, 500px"
+                className="object-cover"
+                priority
+              />
+
+              {/* Latest Badge */}
+              <div className="absolute top-4 right-4">
+                <span className="inline-block bg-mumo-yellow text-black border-2 border-black font-bold px-3 py-1 rounded-full text-sm uppercase tracking-wide shadow-hard-sm transform rotate-3">
+                  New Episode!
+                </span>
+              </div>
             </div>
 
-            {/* Synopsis */}
-            <p className="text-xl md:text-2xl mb-8 leading-relaxed font-medium text-gray-900">
-              {synopsis}
-            </p>
-
-            {/* Tags */}
-            <div className="mb-10">
-              <BadgeGroup className="flex flex-wrap gap-3">
+            {/* Metadata inside the poster frame */}
+            <div className="mt-6 flex flex-col gap-4">
+              <div className="flex justify-center flex-wrap gap-2">
                 {tags.map((tag) => (
                   <Badge
                     key={tag}
                     variant="secondary"
-                    size="md"
-                    className="bg-white text-black border-2 border-black font-bold shadow-hard-sm hover:shadow-hard hover:-translate-y-0.5 transition-all"
+                    size="sm"
+                    className="bg-gray-100 text-black border-2 border-black font-bold"
                   >
                     {tag}
                   </Badge>
                 ))}
-              </BadgeGroup>
-            </div>
+              </div>
 
-            {/* CTA Button */}
-            <Button
-              href={comicUrl}
-              variant="primary"
-              size="lg"
-              className="text-xl px-8 py-4"
-              ariaLabel={`Start reading ${title}`}
-            >
-              <span className="flex items-center gap-3">
-                Start Reading
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
+              <div className="text-lg font-medium text-gray-900 line-clamp-3 px-2">
+                {synopsis}
+              </div>
+
+              <div className="pt-2">
+                <Button
+                  href={comicUrl}
+                  variant="primary"
+                  size="lg"
+                  className="shadow-hard hover:shadow-hard-lg hover:-translate-y-1 transition-all font-heading text-xl"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={3}
-                    d="M13 7l5 5m0 0l-5 5m5-5H6"
-                  />
-                </svg>
-              </span>
-            </Button>
+                  <span className="flex items-center gap-3">
+                    Read Now!
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" /></svg>
+                  </span>
+                </Button>
+                <p className="text-sm text-gray-700 font-medium">
+                  {readingTime} min read
+                </p>  </div>
+            </div>
           </div>
         </div>
       </div>

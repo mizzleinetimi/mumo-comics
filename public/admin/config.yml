@@ -1,0 +1,30 @@
+backend:
+  name: github
+  repo: USER/REPO_NAME # UPDATE THIS with your GitHub username/repo
+  branch: main # or master, depending on your default branch
+
+# Uncomment for local development
+# local_backend: true
+
+media_folder: "public/comics"
+public_folder: "/comics"
+
+collections:
+  - name: "comics"
+    label: "Comics"
+    folder: "content/comics"
+    create: true
+    slug: "{{year}}-{{month}}-{{slug}}"
+    extension: "mdx"
+    format: "frontmatter"
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Slug", name: "slug", widget: "string", pattern: ['^[a-z0-9]+(?:-[a-z0-9]+)*$', 'Must be lowercase with hyphens'] }
+      - { label: "Publish Date", name: "publishDate", widget: "datetime" }
+      - { label: "Synopsis", name: "synopsis", widget: "text" }
+      - { label: "Tags", name: "tags", widget: "list", default: [] }
+      - { label: "Reading Time (minutes)", name: "readingTime", widget: "number", value_type: "int", min: 1, default: 5 }
+      - { label: "Cover Image", name: "coverImage", widget: "image", media_folder: "/public/comics/{{slug}}", public_folder: "/comics/{{slug}}" }
+      - { label: "Author", name: "author", widget: "string", default: "Mumo Team" }
+      - { label: "Featured", name: "featured", widget: "boolean", default: false }
+      - { label: "Body", name: "body", widget: "markdown" }

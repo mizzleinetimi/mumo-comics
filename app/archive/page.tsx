@@ -37,7 +37,7 @@ export default async function ArchivePage({
 }: {
   searchParams: { tags?: string };
 }) {
-  // Fetch all comics and tags
+  // Fetch all comics and tags - triggering rebuild
   const allComics = await getAllComics();
   const allTags = await getAllTags();
 
@@ -46,8 +46,8 @@ export default async function ArchivePage({
   const filteredComics =
     activeTags.length > 0
       ? allComics.filter((comic) =>
-          activeTags.some((tag) => comic.frontmatter.tags.includes(tag))
-        )
+        activeTags.some((tag) => comic.frontmatter.tags.includes(tag))
+      )
       : allComics;
 
   // Get all comic slugs for random button

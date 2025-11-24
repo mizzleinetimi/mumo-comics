@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 /**
  * Footer component with links and copyright information
@@ -115,7 +116,16 @@ export function Footer() {
 
         {/* Copyright */}
         <div className="mt-8 pt-8 border-t-2 border-gray-200 text-center text-sm font-bold text-gray-600">
-          <p>&copy; {currentYear} Mumo Comics. All rights reserved.</p>
+          <div className="flex items-center justify-center gap-1">
+            <span>&copy; {currentYear} Mumo Comics. Powered by Yams</span>
+            <Image
+              src="/images/yam.svg"
+              alt="Yam"
+              width={16}
+              height={16}
+              className="inline-block"
+            />
+          </div>
           <p className="mt-2 text-mumo-orange">
             Made with ❤️ for comic lovers everywhere
           </p>

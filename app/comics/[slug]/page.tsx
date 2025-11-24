@@ -62,7 +62,7 @@ export default async function ComicPage({
 }: {
   params: { slug: string };
 }) {
-  const comic = await getComicBySlug(params.slug);
+  const comic = await getComicBySlug(params.slug); // Triggering rebuild
 
   if (!comic) {
     notFound();

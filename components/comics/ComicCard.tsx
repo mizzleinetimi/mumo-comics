@@ -82,9 +82,9 @@ export function ComicCard({ comic, priority = false }: ComicCardProps) {
       </CardHeader>
 
       <CardContent className="flex-1 px-5 py-2">
-        <p className="text-gray-800 text-base font-medium line-clamp-3 mb-4">
+        <div className="text-gray-800 text-base font-medium line-clamp-3 mb-4">
           {synopsis}
-        </p>
+        </div>
 
         {/* Tags */}
         <BadgeGroup className="flex flex-wrap gap-2">
