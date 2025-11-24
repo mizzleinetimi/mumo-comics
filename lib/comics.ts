@@ -1,5 +1,5 @@
 import { cache } from 'react';
-import { supabaseAdmin } from './supabase/server';
+import { getSupabaseAdmin } from './supabase/server';
 import type { Comic } from '@/types/comic';
 
 /**
@@ -35,7 +35,8 @@ function compareByDateAndSlug(a: Comic, b: Comic): number {
  */
 export const getAllComics = cache(async (): Promise<Comic[]> => {
   try {
-    const { data, error } = await supabaseAdmin
+    const supabase = getSupabaseAdmin();
+    const { data, error } = await supabase
       .from('comics')
       .select('*')
       .order('publish_date', { ascending: false });
@@ -81,7 +82,8 @@ export const getAllComics = cache(async (): Promise<Comic[]> => {
 export const getComicBySlug = cache(
   async (slug: string): Promise<Comic | null> => {
     try {
-      const { data, error } = await supabaseAdmin
+      const supabase = getSupabaseAdmin();
+      const { data, error } = await supabase
         .from('comics')
         .select('*')
         .eq('slug', slug)
