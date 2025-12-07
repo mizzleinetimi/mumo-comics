@@ -121,9 +121,9 @@ export function generateHomeMetadata(latestComicTitle?: string): Metadata {
       siteName: DEFAULT_METADATA.siteName,
       images: [
         {
-          url: `${SITE_URL}/og-image.png`, // Default OG image
-          width: 1200,
-          height: 630,
+          url: `${SITE_URL}/opengraph-image.jpg`,
+          width: 1494,
+          height: 2002,
           alt: 'Mumo Comics',
         },
       ],
