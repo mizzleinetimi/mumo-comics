@@ -1,4 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="6" fill="#FF8C42"/>
-  <text x="16" y="24" font-family="Arial, sans-serif" font-size="22" font-weight="bold" text-anchor="middle" fill="#FFD166">M</text>
+  <!-- Blue background -->
+  <rect width="32" height="32" rx="6" fill="#06BEE1"/>
+  <!-- Wacky M with comic-style font -->
+  <text x="16" y="25" font-family="Comic Sans MS, Chalkboard, cursive" font-size="24" font-weight="bold" text-anchor="middle" fill="#FF8C42" style="letter-spacing: -2px;">M</text>
 </svg>
