@@ -29,8 +29,7 @@ export const metadata: Metadata = {
     default: 'Mumo Comics - Weekly Comics About Technology and Streaming',
     template: '%s | Mumo Comics',
   },
-  description:
-    'Weekly short comics featuring the character Mumo exploring technology, streaming, and modern life.',
+  description: 'Join Mumo on his yamtastic adventures!',
   keywords: ['comics', 'webcomics', 'mumo', 'streaming', 'technology', 'humor'],
   authors: [{ name: 'Mumo Comics Team' }],
   creator: 'Mumo Comics Team',
@@ -41,9 +40,8 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     siteName: 'Mumo Comics',
-    title: 'Mumo Comics - Weekly Comics About Technology and Streaming',
-    description:
-      'Weekly short comics featuring the character Mumo exploring technology, streaming, and modern life.',
+    title: 'Mumo Comics',
+    description: 'Join Mumo on his yamtastic adventures!',
   },
 
   // Twitter
